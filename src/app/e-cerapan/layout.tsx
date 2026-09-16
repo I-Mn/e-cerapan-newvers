@@ -10,7 +10,7 @@ export default function ECerapanLayout({
     <div className="min-h-screen flex bg-[#F8FAFC] ">
       <SideBar />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="shadow-sm border-[#E7EEFF] px-8 py-4 sticky top-0 z-20">
+        <header className="shadow-sm border-[#E7EEFF] px-8 py-4  top-0 z-20">
           <TopBar />
         </header>
 
