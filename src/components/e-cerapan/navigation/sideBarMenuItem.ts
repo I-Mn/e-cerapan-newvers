@@ -14,7 +14,7 @@ export const SIDEBAR_MENU_ITEMS: SideBarMenuItem[] = [
   },
   {
     label: "Pompa Ukur BBM",
-    href: "/",
+    href: "/e-cerapan/pemeriksaanawal",
     icon: Fuel,
   },
   {
