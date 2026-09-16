@@ -9,7 +9,7 @@ export interface SideBarMenuItem {
 export const SIDEBAR_MENU_ITEMS: SideBarMenuItem[] = [
   {
     label: "Beranda",
-    href: "/",
+    href: "/e-cerapan",
     icon: LayoutPanelLeft,
   },
   {
