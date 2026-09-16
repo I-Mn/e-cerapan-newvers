@@ -7,15 +7,15 @@ export default function ECerapanLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <header>
-        <TopBar />
-      </header>
+    <div className="min-h-screen flex bg-[#F8FAFC] ">
+      <SideBar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="shadow-sm border-[#E7EEFF] px-8 py-4 sticky top-0 z-20">
+          <TopBar />
+        </header>
 
-      <div>
-        <SideBar />
-        <main>
-            {children}
+        <main className="flex-1 p-8 overflow-y-auto">
+          {children}
         </main>
       </div>
     </div>
