@@ -1,0 +1,457 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Calendar, AlertTriangle } from 'lucide-react';
+import Breadcrumb from '@/components/e-cerapan/ui/Breadcrumb';
+import PageHeader from '@/components/e-cerapan/ui/PageHeader';
+import FormSection from '@/components/e-cerapan/ui/FormSection';
+import FormField from '@/components/e-cerapan/ui/FormField';
+import Stepper from '@/components/e-cerapan/ui/Stepper';
+
+// ─── Type Definitions ────────────────────────────────────────
+// These interfaces define the shape of form data.
+// When connecting to a database, use these types for your API payload.
+
+interface DataPengujian {
+  nomorOrder: string;
+  namaPemilik: string;
+  nomorSIML: string;
+  contactPerson: string;
+  alamatTerpasang: string;
+  namaPompaUkur: string;
+  tanggalPengujian: string;
+  namaPetugas1: string;
+  namaPetugas2: string;
+}
+
+interface IdentitasUTTP {
+  merek: string;
+  tipeModel: string;
+  nomorSeri: string;
+  jumlahNozzle: string;
+  tahunPembuatan: string;
+}
+
+interface KondisiOperasi {
+  ujiAlkMaksimum: string;
+  ujiAlkMinimum: string;
+  mfr: string;
+  nomorPencacahTipe: string;
+}
+
+interface ChecklistItem {
+  penilaian: 'ya' | 'tidak' | null;
+  keterangan: string;
+}
+
+// ─── Checklist Questions ─────────────────────────────────────
+
+const CHECKLIST_QUESTIONS = [
+  'Apakah PU BBM dilengkapi dengan Pencacah Tipe (hasil tanda tera)?\n• Apakah informasi pada plat identitas/shelter sesuai dengan Pencacah, spesifikasi, dan PU BBM sesuai dengan Pencacah/Tipe?',
+  'Apakah PU BBM sudah dioperasikan dengan benar?\n• Apakah sudah beroperasi/berjalan sesuai rutin dan tidak ada yang rusak?\n• Apakah sudah beroperasi sesuai standar/jam kerja?',
+  'Apakah sertifikasi yang sudah diperoleh pada proses pemeriksaan sudah lengkap dan sesuai?\n• Apakah identitas pada pelat/shelter lengkap dan sesuai?\n• Apakah identitas pada pelat/shelter memiliki trat pelat dan/atau informasi?',
+  'Apakah PU BBM dalam kondisi lengkap dan bersih?',
+  'Apakah pengukuran volume, harga satuan, dan total harga sesuai dengan yang tercatat?',
+  'Apakah tidak terdapat kerusakan atau cacat pada alat yang dapat mempengaruhi ketelitian?',
+  'Apakah Gallon/tangki bersih, tidak berkarat dan tidak berlubang atau pecah?',
+  'Apakah pengukuran volume, harga satuan, dan total harga sesuai dengan yang tercatat pada display?',
+  'Apakah (5 ons) dan bensin/minyak, bola dan batas dipoles, dsb, disiapkan sesuai operasi?',
+  'Apakah metering/lag meter sesuai dengan indikasi udara di dalam tabung pengukuran yang sama?',
+  'Apakah pada PU BBM tidak ditemukan adanya kebocoran atau permasalahan lain?',
+  'Apakah pada PU BBM tidak ditemukan adanya tu kesusutan atau permasalahan lainnya?',
+];
+
+// ─── Shared Input Styles ─────────────────────────────────────
+
+const INPUT_CLASS =
+  'w-full px-4 py-3 rounded-lg border border-gray-300 text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors';
+
+// ─── Page Component ──────────────────────────────────────────
+
+export default function PemeriksaanAwalPage() {
+  // Form state — grouped by section for clarity.
+  // When connecting to a database, you can pass these objects directly to your API.
+  const [dataPengujian, setDataPengujian] = useState<DataPengujian>({
+    nomorOrder: '',
+    namaPemilik: '',
+    nomorSIML: '',
+    contactPerson: '',
+    alamatTerpasang: '',
+    namaPompaUkur: '',
+    tanggalPengujian: '',
+    namaPetugas1: '',
+    namaPetugas2: '',
+  });
+
+  const [identitasUTTP, setIdentitasUTTP] = useState<IdentitasUTTP>({
+    merek: '',
+    tipeModel: '',
+    nomorSeri: '',
+    jumlahNozzle: '',
+    tahunPembuatan: '',
+  });
+
+  const [kondisiOperasi, setKondisiOperasi] = useState<KondisiOperasi>({
+    ujiAlkMaksimum: '',
+    ujiAlkMinimum: '',
+    mfr: '',
+    nomorPencacahTipe: '',
+  });
+
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(
+    CHECKLIST_QUESTIONS.map(() => ({ penilaian: null, keterangan: '' }))
+  );
+
+  // ─── Handlers ────────────────────────────────────────────────
+  // Generic update helpers — keeps code DRY and easy to extend.
+
+  const updateDataPengujian = (field: keyof DataPengujian, value: string) => {
+    setDataPengujian((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateIdentitasUTTP = (field: keyof IdentitasUTTP, value: string) => {
+    setIdentitasUTTP((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateKondisiOperasi = (field: keyof KondisiOperasi, value: string) => {
+    setKondisiOperasi((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateChecklist = (index: number, field: keyof ChecklistItem, value: string | null) => {
+    setChecklist((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  // ─── Submit Handler ──────────────────────────────────────────
+  // Replace the body of this function with your API call when the database is ready.
+
+  const handleSubmit = () => {
+    const payload = {
+      dataPengujian,
+      identitasUTTP,
+      kondisiOperasi,
+      checklist: checklist.map((item, i) => ({
+        no: i + 1,
+        uraian: CHECKLIST_QUESTIONS[i],
+        ...item,
+      })),
+    };
+
+    // TODO: Replace with actual API call
+    // e.g. await fetch('/api/pemeriksaan-awal', { method: 'POST', body: JSON.stringify(payload) });
+    console.log('Form payload:', payload);
+    alert('Validasi Pemeriksaan berhasil! (Data logged to console)');
+  };
+
+  // ─── Check if all checklist items are filled ─────────────────
+
+  const allChecklistFilled = checklist.every((item) => item.penilaian !== null);
+
+  return (
+    <div className="min-h-screen bg-[#F9F9F9] w-full">
+      <div className="px-8 py-8 md:px-12 md:py-12 max-w-[1100px] mx-auto">
+        {/* Breadcrumb */}
+        <Breadcrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'E-Cerapan', href: '/e-cerapan' },
+            { label: 'Pemeriksaan Awal' },
+          ]}
+        />
+
+        {/* Stepper */}
+        <Stepper
+          steps={['Pemeriksaan Awal', 'Pengujian/Pemeriksaan', 'Hasil']}
+          currentStep={0}
+        />
+
+        {/* Page Header */}
+        <PageHeader
+          title="Pemeriksaan Awal"
+          subtitle="Pompa Ukur BBM — Isi seluruh data awal cerapan/pemeriksaan."
+        />
+
+        {/* ═══ SECTION 1: Data Pengujian ═══ */}
+        <FormSection title="Data Pengujian">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+            <FormField label="Nomor Order" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. ORD-001"
+                value={dataPengujian.nomorOrder}
+                onChange={(e) => updateDataPengujian('nomorOrder', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nama Pemilik/Penanggung Jawab" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. PT Pertamina Retail"
+                value={dataPengujian.namaPemilik}
+                onChange={(e) => updateDataPengujian('namaPemilik', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nomor SIML" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 01234"
+                value={dataPengujian.nomorSIML}
+                onChange={(e) => updateDataPengujian('nomorSIML', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Contact Person" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Budi Santoso, 081234567890"
+                value={dataPengujian.contactPerson}
+                onChange={(e) => updateDataPengujian('contactPerson', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Alamat Terpasang" className="md:col-span-2">
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Jl. Indonesia 123"
+                value={dataPengujian.alamatTerpasang}
+                onChange={(e) => updateDataPengujian('alamatTerpasang', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nama Pompa Ukur" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. PU-001"
+                value={dataPengujian.namaPompaUkur}
+                onChange={(e) => updateDataPengujian('namaPompaUkur', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Tanggal Pengujian" required>
+              <div className="relative">
+                <input
+                  type="date"
+                  className={INPUT_CLASS}
+                  value={dataPengujian.tanggalPengujian}
+                  onChange={(e) => updateDataPengujian('tanggalPengujian', e.target.value)}
+                />
+                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+            </FormField>
+
+            <FormField label="Nama Petugas 1" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Budi Santoso"
+                value={dataPengujian.namaPetugas1}
+                onChange={(e) => updateDataPengujian('namaPetugas1', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nama Petugas 2" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Budi Santoso"
+                value={dataPengujian.namaPetugas2}
+                onChange={(e) => updateDataPengujian('namaPetugas2', e.target.value)}
+              />
+            </FormField>
+          </div>
+        </FormSection>
+
+        {/* ═══ SECTION 2: Identitas UTTP (Alat) ═══ */}
+        <FormSection title="Identitas UTTP (Alat)">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5">
+            <FormField label="Merek" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Gilbarco"
+                value={identitasUTTP.merek}
+                onChange={(e) => updateIdentitasUTTP('merek', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Tipe/Model" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. Encore Seri 1"
+                value={identitasUTTP.tipeModel}
+                onChange={(e) => updateIdentitasUTTP('tipeModel', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nomor Seri" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. SN-30092"
+                value={identitasUTTP.nomorSeri}
+                onChange={(e) => updateIdentitasUTTP('nomorSeri', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Jumlah Nozzle" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 1"
+                value={identitasUTTP.jumlahNozzle}
+                onChange={(e) => updateIdentitasUTTP('jumlahNozzle', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Tahun Pembuatan" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 2020"
+                value={identitasUTTP.tahunPembuatan}
+                onChange={(e) => updateIdentitasUTTP('tahunPembuatan', e.target.value)}
+              />
+            </FormField>
+          </div>
+        </FormSection>
+
+        {/* ═══ SECTION 3: Kondisi Operasi ═══ */}
+        <FormSection title="Kondisi Operasi">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+            <FormField label="Uji Alk Maksimum (L/menit)" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 1"
+                value={kondisiOperasi.ujiAlkMaksimum}
+                onChange={(e) => updateKondisiOperasi('ujiAlkMaksimum', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Uji Alk Minimum (L/menit)" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 1"
+                value={kondisiOperasi.ujiAlkMinimum}
+                onChange={(e) => updateKondisiOperasi('ujiAlkMinimum', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="MFR = Min Measured Quantity (L) (hasil)" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. 1"
+                value={kondisiOperasi.mfr}
+                onChange={(e) => updateKondisiOperasi('mfr', e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Nomor Pencacah/Tipe" required>
+              <input
+                type="text"
+                className={INPUT_CLASS}
+                placeholder="cth. P1-X-Style-V2022"
+                value={kondisiOperasi.nomorPencacahTipe}
+                onChange={(e) => updateKondisiOperasi('nomorPencacahTipe', e.target.value)}
+              />
+            </FormField>
+          </div>
+        </FormSection>
+
+        {/* ═══ SECTION 4: Checklist Pemeriksaan ═══ */}
+        <FormSection title="Checklist Pemeriksaan">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[14px]">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-3 font-semibold text-gray-700 w-[50px]">No</th>
+                  <th className="text-left py-3 px-3 font-semibold text-gray-700">Uraian</th>
+                  <th className="text-center py-3 px-3 font-semibold text-gray-700 w-[120px]">Penilaian</th>
+                  <th className="text-left py-3 px-3 font-semibold text-gray-700 w-[200px]">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CHECKLIST_QUESTIONS.map((question, index) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    <td className="py-4 px-3 text-gray-600 align-top font-medium">{index + 1}</td>
+                    <td className="py-4 px-3 text-gray-700 align-top whitespace-pre-line leading-relaxed">
+                      {question}
+                    </td>
+                    <td className="py-4 px-3 align-top">
+                      <div className="flex items-center justify-center gap-4">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`penilaian-${index}`}
+                            checked={checklist[index].penilaian === 'ya'}
+                            onChange={() => updateChecklist(index, 'penilaian', 'ya')}
+                            className="w-4 h-4 accent-[#2479BC]"
+                          />
+                          <span className="text-[13px] text-gray-600">Ya</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`penilaian-${index}`}
+                            checked={checklist[index].penilaian === 'tidak'}
+                            onChange={() => updateChecklist(index, 'penilaian', 'tidak')}
+                            className="w-4 h-4 accent-[#2479BC]"
+                          />
+                          <span className="text-[13px] text-gray-600">Tidak</span>
+                        </label>
+                      </div>
+                    </td>
+                    <td className="py-4 px-3 align-top">
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors"
+                        placeholder="Keterangan..."
+                        value={checklist[index].keterangan}
+                        onChange={(e) => updateChecklist(index, 'keterangan', e.target.value)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Warning */}
+          {!allChecklistFilled && (
+            <div className="flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50 rounded-lg border border-amber-200">
+              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+              <p className="text-[14px] text-amber-700">
+                Lengkapi semua penilaian checklist sebelum melanjutkan.
+              </p>
+            </div>
+          )}
+        </FormSection>
+
+        {/* ═══ Submit Button ═══ */}
+        <button
+          onClick={handleSubmit}
+          disabled={!allChecklistFilled}
+          className={`w-full py-4 rounded-xl text-[18px] font-semibold transition-all ${allChecklistFilled
+            ? 'bg-[#2479BC] text-white hover:bg-[#1d6aa6] active:scale-[0.99] cursor-pointer'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+        >
+          Validasi Pemeriksaan
+        </button>
+      </div>
+    </div>
+  );
+}
