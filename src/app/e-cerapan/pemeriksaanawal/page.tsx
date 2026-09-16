@@ -8,9 +8,6 @@ import FormSection from '@/components/e-cerapan/ui/FormSection';
 import FormField from '@/components/e-cerapan/ui/FormField';
 import Stepper from '@/components/e-cerapan/ui/Stepper';
 
-// ─── Type Definitions ────────────────────────────────────────
-// These interfaces define the shape of form data.
-// When connecting to a database, use these types for your API payload.
 
 interface DataPengujian {
   nomorOrder: string;
@@ -61,16 +58,13 @@ const CHECKLIST_QUESTIONS = [
   'Apakah pada PU BBM tidak ditemukan adanya tu kesusutan atau permasalahan lainnya?',
 ];
 
-// ─── Shared Input Styles ─────────────────────────────────────
 
 const INPUT_CLASS =
   'w-full px-4 py-3 rounded-lg border border-gray-300 text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors';
 
-// ─── Page Component ──────────────────────────────────────────
 
 export default function PemeriksaanAwalPage() {
-  // Form state — grouped by section for clarity.
-  // When connecting to a database, you can pass these objects directly to your API.
+
   const [dataPengujian, setDataPengujian] = useState<DataPengujian>({
     nomorOrder: '',
     namaPemilik: '',
@@ -103,7 +97,6 @@ export default function PemeriksaanAwalPage() {
   );
 
   // ─── Handlers ────────────────────────────────────────────────
-  // Generic update helpers — keeps code DRY and easy to extend.
 
   const updateDataPengujian = (field: keyof DataPengujian, value: string) => {
     setDataPengujian((prev) => ({ ...prev, [field]: value }));
@@ -126,7 +119,6 @@ export default function PemeriksaanAwalPage() {
   };
 
   // ─── Submit Handler ──────────────────────────────────────────
-  // Replace the body of this function with your API call when the database is ready.
 
   const handleSubmit = () => {
     const payload = {
