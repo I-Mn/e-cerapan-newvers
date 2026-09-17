@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Calendar } from 'lucide-react';
 import Breadcrumb from '@/components/e-cerapan/ui/Breadcrumb';
 import PageHeader from '@/components/e-cerapan/ui/PageHeader';
@@ -14,6 +15,8 @@ const INPUT_CLASS =
   'w-full px-4 py-3 rounded-lg border border-gray-300 text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed';
 
 export default function PengujianPerhitunganPage() {
+  const router = useRouter();
+
   const [dataPengujian] = useState({
     nomorOrder: 'ORD-2024-0847',
     noSPBU: '34.121.01',
@@ -197,13 +200,15 @@ export default function PengujianPerhitunganPage() {
 
         <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
           <button
-            onClick={() => window.history.back()}
+            type="button"
+            onClick={() => router.push('/e-cerapan/pemeriksaanawal')}
             className="w-full sm:w-1/2 py-4 rounded-xl text-[16px] font-semibold text-gray-700 bg-transparent border-2 border-gray-300 hover:bg-gray-50 transition-all active:scale-[0.99]"
           >
             Kembali
           </button>
           <button
-            onClick={() => console.log('Navigating to hasil evaluasi...')}
+            type="button"
+            onClick={() => router.push('/e-cerapan/hasilpengujian')}
             className="w-full sm:w-1/2 py-4 rounded-xl text-[16px] font-semibold text-white bg-[#2479BC] hover:bg-[#1d6aa6] transition-all active:scale-[0.99]"
           >
             Lihat Hasil Evaluasi
