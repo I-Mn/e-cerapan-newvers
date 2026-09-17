@@ -138,9 +138,32 @@ export default function PemeriksaanAwalPage() {
     alert('Validasi Pemeriksaan berhasil! (Data logged to console)');
   };
 
-  // ─── Check if all checklist items are filled ─────────────────
+// ─── Check Validation ──────────────────────────────────────────
 
   const allChecklistFilled = checklist.every((item) => item.penilaian !== null);
+
+  const allRequiredFieldsFilled = [
+    dataPengujian.nomorOrder,
+    dataPengujian.namaPemilik,
+    dataPengujian.nomorSIML,
+    dataPengujian.contactPerson,
+    dataPengujian.namaPompaUkur,
+    dataPengujian.tanggalPengujian,
+    dataPengujian.namaPetugas1,
+    dataPengujian.namaPetugas2,
+    identitasUTTP.merek,
+    identitasUTTP.tipeModel,
+    identitasUTTP.nomorSeri,
+    identitasUTTP.jumlahNozzle,
+    identitasUTTP.tahunPembuatan,
+    kondisiOperasi.ujiAlkMaksimum,
+    kondisiOperasi.ujiAlkMinimum,
+    kondisiOperasi.mfr,
+    kondisiOperasi.nomorPencacahTipe,
+  ].every((val) => val.trim() !== '');
+
+  const isFormValid = allChecklistFilled && allRequiredFieldsFilled;
+
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] w-full">
@@ -376,57 +399,85 @@ export default function PemeriksaanAwalPage() {
                 </tr>
               </thead>
               <tbody>
-                {CHECKLIST_QUESTIONS.map((question, index) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50">
-                    <td className="py-4 px-3 text-gray-600 align-top font-medium">{index + 1}</td>
-                    <td className="py-4 px-3 text-gray-700 align-top whitespace-pre-line leading-relaxed">
-                      {question}
-                    </td>
-                    <td className="py-4 px-3 align-top">
-                      <div className="flex items-center justify-center gap-4">
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`penilaian-${index}`}
-                            checked={checklist[index].penilaian === 'ya'}
-                            onChange={() => updateChecklist(index, 'penilaian', 'ya')}
-                            className="w-4 h-4 accent-[#2479BC]"
-                          />
-                          <span className="text-[13px] text-gray-600">Ya</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`penilaian-${index}`}
-                            checked={checklist[index].penilaian === 'tidak'}
-                            onChange={() => updateChecklist(index, 'penilaian', 'tidak')}
-                            className="w-4 h-4 accent-[#2479BC]"
-                          />
-                          <span className="text-[13px] text-gray-600">Tidak</span>
-                        </label>
-                      </div>
-                    </td>
-                    <td className="py-4 px-3 align-top">
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors"
-                        placeholder="Keterangan..."
-                        value={checklist[index].keterangan}
-                        onChange={(e) => updateChecklist(index, 'keterangan', e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {CHECKLIST_QUESTIONS.map((question, index) => {
+                  const isYa = checklist[index].penilaian === 'ya';
+                  const isTidak = checklist[index].penilaian === 'tidak';
+
+                  return (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50">
+                      <td className="py-4 px-3 text-gray-600 align-top font-medium">{index + 1}</td>
+                      <td className="py-4 px-3 text-gray-700 align-top whitespace-pre-line leading-relaxed">
+                        {question}
+                      </td>
+                      <td className="py-4 px-3 align-top">
+                        <div className="flex items-center justify-center gap-4">
+                          
+                          {/* Tombol"Ya" */}
+                          <button
+                            type="button"
+                            // Jika sudah "ya", klik lagi akan mengubahnya jadi null (cancel). Jika belum, ubah jadi "ya"
+                            onClick={() => updateChecklist(index, 'penilaian', isYa ? null : 'ya')}
+                            className="flex items-center gap-1.5 cursor-pointer group focus:outline-none"
+                          >
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                              isYa ? 'border-[#64CC4A]' : 'border-gray-300 group-hover:border-gray-400'
+                            }`}>
+                              {/* Lingkaran dalam (hijau solid tanpa hitam) */}
+                              {isYa && <div className="w-2 h-2 rounded-full bg-[#64CC4A]" />}
+                            </div>
+                            <span className={`text-[13px] transition-colors ${
+                              isYa ? 'text-[#64CC4A] font-bold' : 'text-gray-600 group-hover:text-gray-800'
+                            }`}>
+                              Ya
+                            </span>
+                          </button>
+
+                          {/* Tombol "Tidak" */}
+                          <button
+                            type="button"
+                            // Jika sudah "tidak", klik lagi akan mengubahnya jadi null (cancel). Jika belum, ubah jadi "tidak"
+                            onClick={() => updateChecklist(index, 'penilaian', isTidak ? null : 'tidak')}
+                            className="flex items-center gap-1.5 cursor-pointer group focus:outline-none"
+                          >
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                              isTidak ? 'border-red-500' : 'border-gray-300 group-hover:border-gray-400'
+                            }`}>
+                              {/* Lingkaran dalam (merah solid) */}
+                              {isTidak && <div className="w-2 h-2 rounded-full bg-red-500" />}
+                            </div>
+                            <span className={`text-[13px] transition-colors ${
+                              isTidak ? 'text-red-500 font-bold' : 'text-gray-600 group-hover:text-gray-800'
+                            }`}>
+                              Tidak
+                            </span>
+                          </button>
+
+                        </div>
+                      </td>
+                      <td className="py-4 px-3 align-top">
+                        <input
+                          type="text"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-300 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2479BC]/30 focus:border-[#2479BC] transition-colors"
+                          placeholder="Keterangan..."
+                          value={checklist[index].keterangan}
+                          onChange={(e) => updateChecklist(index, 'keterangan', e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           {/* Warning */}
-          {!allChecklistFilled && (
+          {!isFormValid && (
             <div className="flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50 rounded-lg border border-amber-200">
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
               <p className="text-[14px] text-amber-700">
-                Lengkapi semua penilaian checklist sebelum melanjutkan.
+                {!allRequiredFieldsFilled 
+                  ? 'Lengkapi semua kolom form yang wajib diisi (bertanda *).' 
+                  : 'Lengkapi semua penilaian checklist sebelum melanjutkan.'}
               </p>
             </div>
           )}
@@ -435,11 +486,12 @@ export default function PemeriksaanAwalPage() {
         {/* ═══ Submit Button ═══ */}
         <button
           onClick={handleSubmit}
-          disabled={!allChecklistFilled}
-          className={`w-full py-4 rounded-xl text-[18px] font-semibold transition-all ${allChecklistFilled
-            ? 'bg-[#2479BC] text-white hover:bg-[#1d6aa6] active:scale-[0.99] cursor-pointer'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+          disabled={!isFormValid}
+          className={`w-full py-4 rounded-xl text-[18px] font-semibold transition-all ${
+            isFormValid
+              ? 'bg-[#2479BC] text-white hover:bg-[#1d6aa6] active:scale-[0.99] cursor-pointer'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
         >
           Validasi Pemeriksaan
         </button>
