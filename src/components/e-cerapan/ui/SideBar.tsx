@@ -10,7 +10,7 @@ export default function SideBar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-73 bg-white border-r border-[#E7EEFF] flex flex-col shrink-0 shadow-[4px_0px_10px_0px_rgba(0,0,0,0.03)]">
+    <aside className="sticky top-0 self-start h-screen w-73 overflow-y-auto bg-white border-r border-[#E7EEFF] flex flex-col shrink-0 shadow-[4px_0px_10px_0px_rgba(0,0,0,0.03)]">
       <div className="h-22.5 flex items-end justify-center">
         <div className="w-61 border-b border-[#E7EEFF]" />
       </div>
