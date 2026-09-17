@@ -1,5 +1,6 @@
 import Stepper from "@/components/e-cerapan/ui/Stepper";
 
+//hardcodenya
 const details = [
 	{ label: "No. Pengujian", value: "PU-BBM-2024-0847", accent: true },
 	{ label: "Status", value: "LULUS UJI", accent: true },
