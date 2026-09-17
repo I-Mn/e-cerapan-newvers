@@ -2,12 +2,13 @@
 
 import React from 'react';
 import Link from "next/link";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { SIDEBAR_MENU_ITEMS } from '../navigation/sideBarMenuItem';
 import { LogOut } from 'lucide-react';
 
 export default function SideBar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <aside className="sticky top-0 self-start h-screen w-73 overflow-y-auto bg-white border-r border-[#E7EEFF] flex flex-col shrink-0 shadow-[4px_0px_10px_0px_rgba(0,0,0,0.03)]">
@@ -41,7 +42,11 @@ export default function SideBar() {
         <div className="w-61 mx-auto border-b border-[#E7EEFF] my-1" />
 
         <div className="flex justify-center">
-          <button className="w-61 flex items-center gap-2.5 px-5 py-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-left">
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="w-61 flex items-center gap-2.5 px-5 py-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-left"
+          >
             <LogOut className="w-5 h-5 shrink-0" />
             <span>Keluar</span>
           </button>

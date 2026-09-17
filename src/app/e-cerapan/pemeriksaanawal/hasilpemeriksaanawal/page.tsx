@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/e-cerapan/ui/Breadcrumb';
 import Stepper from '@/components/e-cerapan/ui/Stepper';
 import StatusBanner from '@/components/e-cerapan/ui/StatusBanner';
@@ -45,6 +46,8 @@ const CHECKLIST_RESULTS = [
 ];
 
 export default function HasilPemeriksaanAwalPage() {
+    const router = useRouter();
+
     // Derived statistics
     const totalParameter = CHECKLIST_RESULTS.length;
     const memenuhiCount = CHECKLIST_RESULTS.filter(item => item.penilaian === 'Ya').length;
@@ -154,12 +157,15 @@ export default function HasilPemeriksaanAwalPage() {
                 {/* 5. Action Buttons */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
                     <button
-                        onClick={() => window.history.back()}
+                        type="button"
+                        onClick={() => router.push('/e-cerapan/pemeriksaanawal')}
                         className="w-full sm:w-1/2 py-4 rounded-xl text-[16px] font-semibold text-gray-700 bg-transparent border-2 border-gray-300 hover:bg-gray-50 transition-all active:scale-[0.99]"
                     >
                         Kembali ke Pemeriksaan
                     </button>
                     <button
+                        type="button"
+                        onClick={() => isLolos && router.push('/e-cerapan/pengujian')}
                         disabled={!isLolos}
                         className={`w-full sm:w-1/2 py-4 rounded-xl text-[16px] font-semibold transition-all ${isLolos
                             ? 'bg-[#2479BC] text-white hover:bg-[#1d6aa6] active:scale-[0.99] cursor-pointer'
