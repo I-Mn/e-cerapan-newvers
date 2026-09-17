@@ -13,7 +13,6 @@ export default function StatusBanner({ status, title, subtitle }: StatusBannerPr
 
     return (
         <div className="w-full bg-white rounded-xl border border-gray-100 shadow-sm p-8 flex flex-col items-center justify-center text-center">
-            {/* Updated size to w-24 h-24 (96px) and exact Figma color */}
             <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-4 ${isSuccess ? 'bg-[#64CC4A]' : 'bg-red-500'}`}>
                 {isSuccess ? (
                     <Check className="w-12 h-12 text-white" strokeWidth={3} />
@@ -21,7 +20,6 @@ export default function StatusBanner({ status, title, subtitle }: StatusBannerPr
                     <X className="w-12 h-12 text-white" strokeWidth={3} />
                 )}
             </div>
-            {/* Applied Figma color to the title as well */}
             <h2 className={`text-2xl font-bold mb-2 uppercase ${isSuccess ? 'text-[#64CC4A]' : 'text-red-500'}`}>
                 {title}
             </h2>
