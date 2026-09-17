@@ -13,23 +13,8 @@ export const SIDEBAR_MENU_ITEMS: SideBarMenuItem[] = [
     icon: LayoutPanelLeft,
   },
   {
-    label: "Pemeriksaan Awal",
-    href: "/e-cerapan/pemeriksaanawal",
-    icon: Fuel,
-  },
-  {
-    label: "Hasil Pemeriksaan",
-    href: "/e-cerapan/pemeriksaanawal/hasilpemeriksaanawal",
-    icon: Fuel,
-  },
-  {
-    label: "Pengujian",
+    label: "Pompa Ukur BBM",
     href: "/e-cerapan/pengujian",
     icon: Fuel,
-  },
-  {
-    label: "Hasil Pengujian",
-    href: "/e-cerapan/hasilpengujian",
-    icon: Fuel,
-  },
+  }
 ];

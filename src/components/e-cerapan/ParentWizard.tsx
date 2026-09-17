@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { WizardFormData, WizardStepProps } from '@/types/wizard';
-import PemeriksaanAwalPage from '@/app/e-cerapan/pemeriksaanawal/page';
-import HasilPemeriksaanAwalPage from '@/app/e-cerapan/pemeriksaanawal/hasilpemeriksaanawal/page';
-import PengujianPerhitunganPage from '@/app/e-cerapan/pengujian/page';
-import HasilPengujianPage from '@/app/e-cerapan/hasilpengujian/page';
+import PemeriksaanAwalPage from '@/app/e-cerapan/forms/PemeriksaanAwal';
+import HasilPemeriksaanAwalPage from '@/app/e-cerapan/forms/HasilPemeriksaanAwal';
+import PengujianPerhitunganPage from '@/app/e-cerapan/forms/PengujianPerhitungan';
+import HasilPengujianPage from '@/app/e-cerapan/forms/HasilPengujian';
 
 export const initialWizardFormData: WizardFormData = {
   step1: {
