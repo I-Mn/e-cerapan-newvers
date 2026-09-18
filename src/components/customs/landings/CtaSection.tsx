@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 export default function CtaSection() {
   const router = useRouter();
   return (
-    <section className="px-32 py-14 md:py-20 flex justify-center bg-white">
+    <section className="px-32 py-5 md:py-10 flex justify-center bg-white">
       <div className="w-full rounded-[2rem] bg-blue-600 px-6 py-12 text-center text-white md:px-12 md:py-16 shadow-lg">
 
         <p className="text-4xl font-bold">

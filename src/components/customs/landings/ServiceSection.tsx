@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function ServiceSection() {
   return (
-    <section id="services" className="mx-auto max-w-content px-32 py-14 md:py-20">
+    <section id="services" className="mx-auto max-w-content px-32 py-5 md:py-10">
       <div className="flex flex-col gap-10 md:flex-row md:items-start md:gap-14 lg:gap-20">
         <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80 shrink-0">
           <Image

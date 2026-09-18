@@ -3,8 +3,8 @@ import { Check } from 'lucide-react'
 
 export default function StepsSection() {
   return (
-    <section className="  md:py-20">
-      <div className="mx-auto max-w-content px-6 py-15 text-center text-white bg-blue-500 rounded-tl-[100px] rounded-br-[100px]">
+    <section className="py-10">
+      <div className="mx-auto max-w-content px-6 p-15 text-center text-white bg-blue-500 rounded-tl-[100px] rounded-br-[100px]">
         <div>
           <h2 className="text-2xl font-bold md:text-3xl">
             3 Langkah Kerja E-Cerapan
