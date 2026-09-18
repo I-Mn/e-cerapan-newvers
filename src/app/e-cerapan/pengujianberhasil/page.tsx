@@ -1,3 +1,6 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
 import Stepper from "@/components/e-cerapan/ui/Stepper";
 
 //hardcodenya
@@ -9,6 +12,56 @@ const details = [
 ];
 
 export default function PengujianBerhasilPage() {
+	const subscribe = () => () => {};
+	const pdfData = useSyncExternalStore(
+		subscribe,
+		() => sessionStorage.getItem("e-cerapan-pdf"),
+		() => null
+	);
+	const pdfName = useSyncExternalStore(
+		subscribe,
+		() => sessionStorage.getItem("e-cerapan-pdf-name") || "SKHP-hasil-pengujian.pdf",
+		() => "SKHP-hasil-pengujian.pdf"
+	);
+
+	const createPdfBlob = async () => {
+		if (!pdfData) return null;
+
+		const response = await fetch(pdfData);
+		return response.blob();
+	};
+
+	const previewPdf = async () => {
+		if (!pdfData) return;
+
+		const previewWindow = window.open("about:blank", "_blank");
+		if (!previewWindow) return;
+
+		try {
+			const pdfBlob = await createPdfBlob();
+			if (!pdfBlob) return;
+
+			const pdfUrl = URL.createObjectURL(pdfBlob);
+			previewWindow.location.href = pdfUrl;
+			window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 60_000);
+		} catch (error) {
+			previewWindow.close();
+			console.error("Gagal membuka pratinjau PDF:", error);
+		}
+	};
+
+	const downloadPdf = async () => {
+		const pdfBlob = await createPdfBlob();
+		if (!pdfBlob) return;
+
+		const pdfUrl = URL.createObjectURL(pdfBlob);
+		const link = document.createElement("a");
+		link.href = pdfUrl;
+		link.download = pdfName;
+		link.click();
+		window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 1_000);
+	};
+
 	return (
 		<div className="min-h-screen w-full bg-[#F9F9F9]">
 			<div className="mx-auto w-full max-w-[780px] px-6 py-8 md:px-10 md:py-9">
@@ -66,12 +119,16 @@ export default function PengujianBerhasilPage() {
 					<div className="mt-7 grid w-full grid-cols-1 gap-7 sm:grid-cols-2">
 						<button
 							type="button"
+							onClick={previewPdf}
+							disabled={!pdfData}
 							className="h-[42px] rounded-md bg-[#2C82C4] px-[16px] py-[8px] text-base font-bold text-white shadow-sm transition-colors hover:bg-[#2479BC]"
 						>
 							Pratinjau PDF
 						</button>
 						<button
 							type="button"
+							onClick={downloadPdf}
+							disabled={!pdfData}
 							className="h-[42px] rounded-md border-2 border-[#2C82C4] bg-white px-[16px] py-[8px] text-base font-bold text-[#2C82C4] transition-colors hover:bg-[#F0F7FC]"
 						>
 							Unduh PDF

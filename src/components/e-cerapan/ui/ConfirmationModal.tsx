@@ -78,7 +78,7 @@ export default function ConfirmModal({
             disabled={isLoading}
             className="w-full py-[8px] px-[16px] rounded-lg bg-[#2479BC] hover:bg-[#1d649c] text-white text-base font-bold transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {isLoading ? "Menyimpan..." : "Konfirmasi & Simpan"}
+            {isLoading ? "Mengirim..." : "Konfirmasi & Kirim"}
           </button>
         </div>
       </div>

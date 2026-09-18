@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import Breadcrumb from "@/components/e-cerapan/ui/Breadcrumb";
 import Stepper from "@/components/e-cerapan/ui/Stepper";
@@ -31,142 +32,270 @@ export default function HasilPengujianPage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+const getImageDataURL = (src: string): Promise<string | null> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+};
   const handleConfirmSimpan = async () => {
     setIsLoading(true);
     try {
-      const pdf = new jsPDF();
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 18;
-      const lineHeight = 5.5;
-      let y = 16;
-      const dataPengujianForm = formData?.step1?.dataPengujian;
-      const tanggal = dataPengujianForm?.tanggalPengujian || new Date().toISOString().slice(0, 10);
-      const formatTanggal = new Date(`${tanggal}T00:00:00`).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
+      const lineHeight = 4.4;
 
-      const logoData = await fetch("/assets/logo/Metrologi.svg")
-        .then((response) => response.text())
-        .then((svg) => new Promise<string | null>((resolve) => {
-          const image = new Image();
-          image.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = image.naturalWidth;
-            canvas.height = image.naturalHeight;
-            canvas.getContext("2d")?.drawImage(image, 0, 0);
-            resolve(canvas.toDataURL("image/png"));
-          };
-          image.onerror = () => resolve(null);
-          image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-        }))
-        .catch(() => null);
+      const dataForm = formData?.step1?.dataPengujian;
+      const nomorSurat = dataForm?.nomorSIML || "P.5617/PKTN.4.5/DL/07/2025";
+      const nomorDokumenAtas = "DL-P-25-0095-001";
 
-      if (logoData) {
-        pdf.addImage(logoData, "PNG", margin, 12, 18, 18);
+      // halaman 1
+      const logoData = await getImageDataURL("/assets/logo/Metrologi.svg");
+
+      if (logoData && logoData.startsWith("data:image")) {
+        try {
+          pdf.addImage(logoData, "PNG", margin, 10, 11, 11);
+        } catch (imgError) {
+          console.error("Gagal menambahkan gambar ke PDF:", imgError);
+        }
       }
 
-      pdf.setTextColor(0, 0, 0);
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(11);
-      pdf.text("KEMENTERIAN PERDAGANGAN REPUBLIK INDONESIA", pageWidth / 2, 15, { align: "center" });
-      pdf.setFontSize(14);
-      pdf.text("DIREKTORAT METROLOGI", pageWidth / 2, 21, { align: "center" });
-      pdf.setFontSize(9);
+      pdf.setFontSize(8.5);
+      pdf.text("KEMENTERIAN PERDAGANGAN", margin + 14, 12);
       pdf.setFont("helvetica", "normal");
-      pdf.text("Unit Pelaksana Teknis Metrologi Legal", pageWidth / 2, 26, { align: "center" });
-      pdf.text("Pelayanan Pengujian Alat Ukur, Takar, Timbang dan Perlengkapannya", pageWidth / 2, 30.5, { align: "center" });
-      pdf.setLineWidth(0.7);
-      pdf.line(margin, 35, pageWidth - margin, 35);
-      pdf.setLineWidth(0.2);
-      pdf.line(margin, 36.5, pageWidth - margin, 36.5);
+      pdf.setFontSize(6.5);
+      pdf.text("REPUBLIK INDONESIA", margin + 14, 16);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text(nomorDokumenAtas, pageWidth - margin, 16, { align: "right" });
 
-      y = 45;
+      let y = 34;
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(12);
+      pdf.setFontSize(10.5);
       pdf.text("SURAT KETERANGAN HASIL PENGUJIAN", pageWidth / 2, y, { align: "center" });
-      y += 6;
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(9);
-      pdf.text(`Nomor: ${dataPengujianForm?.nomorSIML || "-"} / E-CERAPAN / ${new Date().getFullYear()}`, pageWidth / 2, y, { align: "center" });
-      y += 8;
-
-      const addField = (label: string, value: string | number | undefined, options?: { bold?: boolean }) => {
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(9);
-        pdf.text(label, margin, y);
-        pdf.text(":", margin + 37, y);
-        pdf.setFont("helvetica", options?.bold ? "bold" : "normal");
-        const wrapped = pdf.splitTextToSize(String(value || "-"), pageWidth - margin - 45);
-        pdf.text(wrapped, margin + 41, y);
-        y += Math.max(lineHeight, wrapped.length * lineHeight);
-      };
-
-      addField("Nomor Order", dataPengujianForm?.nomorOrder, { bold: true });
-      addField("Jenis Alat UTTP", "Pompa Ukur BBM");
-      addField("Merek / Tipe / Nomor Seri", `${identitasAlat[0].value} / ${identitasAlat[1].value} / ${identitasAlat[2].value}`);
-      addField("Kapasitas / Jumlah Nozzle", `${identitasAlat[3].value} nozzle`);
-      addField("Tahun Pembuatan", identitasAlat[4].value);
-      addField("Pemilik / Pemakai", dataPengujianForm?.namaPemilik);
-      addField("Alamat Terpasang", dataPengujianForm?.alamatTerpasang);
-      addField("No. SPBU", dataPengujianForm?.noSPBU);
-      addField("Tanggal Pengujian", formatTanggal);
-      addField("Petugas Penguji", `${dataPengujianForm?.namaPetugas1 || "-"} dan ${dataPengujianForm?.namaPetugas2 || "-"}`);
-      addField("Metode", "Perbandingan langsung dengan standar metrologi");
-      addField(
-        "Hasil Pengujian",
-        displayIsSuccess
-          ? `Dinyatakan LULUS UJI berdasarkan hasil pemeriksaan ${displayDiperiksa} parameter, dengan ${displayLolos} parameter lolos.`
-          : `Dinyatakan TIDAK LULUS UJI karena terdapat ${displayGagal} parameter yang tidak memenuhi persyaratan.`,
-        { bold: true },
-      );
-
-      y += 3;
-      pdf.setLineWidth(0.7);
-      pdf.line(margin, y, pageWidth - margin, y);
-      y += 5;
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(8);
-      pdf.text("RINGKASAN HASIL CERAPAN", margin, y);
       y += 5;
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
-      const summary = `Jumlah cerapan: ${cerapan.length || 0} | Lolos: ${cerapan.filter((item) => item.status === "lolos").length} | Tidak lolos: ${cerapan.filter((item) => item.status === "tidak_lolos").length} | Total volume terpakai: ${formData?.step2?.totalisator?.totalTerpakai || "-"}`;
-      pdf.text(pdf.splitTextToSize(summary, pageWidth - margin * 2), margin, y);
+      pdf.text(`Nomor: ${nomorSurat}`, pageWidth / 2, y, { align: "center" });
       y += 10;
 
+      const addKeyValue = (
+        label: string,
+        value: string | string[],
+        options?: { boldValue?: boolean; extraGap?: number }
+      ) => {
+        const labelX = margin;
+        const colonX = margin + 43;
+        const valueX = margin + 46;
+        const maxValueWidth = pageWidth - margin - valueX;
+
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8);
+        pdf.text(label, labelX, y);
+        pdf.text(":", colonX, y);
+
+        pdf.setFont("helvetica", options?.boldValue ? "bold" : "normal");
+
+        if (Array.isArray(value)) {
+          let currentY = y;
+          value.forEach((line) => {
+            const splitLines = pdf.splitTextToSize(line, maxValueWidth);
+            pdf.text(splitLines, valueX, currentY);
+            currentY += splitLines.length * lineHeight;
+          });
+          y = currentY + (options?.extraGap || 0);
+        } else {
+          const splitLines = pdf.splitTextToSize(String(value || "-"), maxValueWidth);
+          pdf.text(splitLines, valueX, y);
+          y += Math.max(lineHeight, splitLines.length * lineHeight) + (options?.extraGap || 0);
+        }
+      };
+
+      addKeyValue("Jenis UTTP", "Tangki Ukur Mobil");
+      addKeyValue("Merek/Tipe", `${identitasAlat?.[0]?.value || "Aweco"} / ${identitasAlat?.[1]?.value || "AWC 40000L"}`);
+      addKeyValue("Nomor Seri", identitasAlat?.[2]?.value || "20.10.01 B.254/06");
+      addKeyValue("Media Uji/Komoditas", "Air");
+      addKeyValue("Kapasitas Maksimum", `${identitasAlat?.[3]?.value || "40000"} Liter`);
+      addKeyValue("Buatan", identitasAlat?.[4]?.value || "Indonesia");
+      addKeyValue("Nama Pabrikan", "Aweco");
+      addKeyValue(
+        "Alamat Pabrikan",
+        "Jl. Raya Wonoayu 26C Desa/Kelurahan Gempol, Kec. Gempol, Kab. Pasuruan, Provinsi Jawa Timur - 67155"
+      );
+      addKeyValue("Pemohon", "PT Aweco Indosteel Perkasa", { boldValue: true });
+      addKeyValue(
+        "Alamat Pemohon",
+        "Graha Elnusa Lt. 2, Jl. TB Simatupang Kav. 1B Jakarta Selatan"
+      );
+      addKeyValue("Diuji/Diverifikasi Oleh", [
+        "Mochamad Ibnu Athoillah, S.T., M.App.Ec (Intl)    NIP : 198008262003121001",
+        "Moh. Agung Nugroho, A. Md.                       NIP : 198912242012121001",
+      ]);
+      addKeyValue("Waktu Pengujian/Verifikasi", "23 Juni 2025 - 29 Juni 2025");
+      addKeyValue(
+        "Lokasi Pengujian/Verifikasi",
+        "Jl. Raya Wonoayu 26C Desa/Kelurahan Gempol, Kec. Gempol, Kab. Pasuruan, Provinsi Jawa Timur - 67155"
+      );
+      addKeyValue(
+        "Dasar Pengujian/Verifikasi",
+        "Surat Permohonan dari: PT Aweco Indosteel Perkasa\nNomor: 017/AWC/V/2025-D, Tanggal: 11 Juni 2025"
+      );
+      addKeyValue(
+        "Persyaratan Teknis",
+        "Lampiran 1 huruf E Nomor 2.X. Syarat Teknis Tangki Ukur Mobil Bahan Bakar Minyak Peraturan Menteri Perdagangan No 21 Tahun 2023 Tentang Perubahan Atas Peraturan Menteri Perdagangan Nomor 26 tahun 2021 tentang Penetapan Standar Kegiatan Usaha dan Produk Pada Penyelenggaraan Perizinan Berbasis Risiko Sektor Perdagangan"
+      );
+      addKeyValue(
+        "Hasil",
+        "Tangki Ukur Mobil Merek Aweco tipe AWC 40000L dinyatakan Memenuhi Syarat Teknis, untuk jenis-jenis pengujian terlampir yang merupakan bagian tidak terpisahkan dari Surat Keterangan Hasil Pengujian ini."
+      );
+
+      y = Math.max(y + 6, pageHeight - 40);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
-      pdf.text("CATATAN:", margin, y);
+      pdf.text("Bandung, 8 Juli 2025", pageWidth - margin, y, { align: "right" });
       y += 4;
-      pdf.text("1. Surat keterangan ini dibuat berdasarkan data pengujian yang tersimpan dalam sistem e-Cerapan.", margin + 3, y);
-      y += 4;
-      pdf.text("2. Dokumen ini berlaku sesuai ketentuan peraturan perundang-undangan metrologi legal.", margin + 3, y);
+      pdf.text("Kepala Balai Pengujian", pageWidth - margin, y, { align: "right" });
+      pdf.addPage();
 
-      y = Math.min(Math.max(y + 10, 220), pageHeight - 45);
-      pdf.text(`${dataPengujianForm?.alamatTerpasang || "Tempat pengujian"}, ${formatTanggal}`, pageWidth - margin, y, { align: "right" });
-      y += 5;
-      pdf.text("KEPALA UNIT PELAKSANA TEKNIS METROLOGI LEGAL", pageWidth - margin, y, { align: "right" });
-      y += 22;
-      pdf.setFont("helvetica", "bold");
-      pdf.text(dataPengujianForm?.namaPetugas1 || "Petugas Penguji", pageWidth - margin, y, { align: "right" });
+      // halaman 2
       pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text(`Lampiran ${nomorSurat}`, pageWidth - margin, 15, { align: "right" });
+
+      y = 30;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10.5);
+      pdf.text("RESUME PENGUJIAN TIPE UTTP", pageWidth / 2, y, { align: "center" });
       y += 4;
-      pdf.text("Petugas Penguji", pageWidth - margin, y, { align: "right" });
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text(`Nomor: ${nomorSurat}`, pageWidth / 2, y, { align: "center" });
+      y += 8;
 
-      pdf.setFontSize(7);
-      pdf.text("Dokumen dicetak melalui aplikasi e-Cerapan", margin, pageHeight - 12);
-      pdf.text(`Halaman 1 dari 1`, pageWidth - margin, pageHeight - 12, { align: "right" });
+      const tableHead: import("jspdf-autotable").RowInput[] = [
+        [
+          { content: "NO", rowSpan: 2, styles: { halign: "center", valign: "middle" } },
+          { content: "PEMERIKSAAN & PENGUJIAN", rowSpan: 2, styles: { halign: "center", valign: "middle" } },
+          { content: "PEMENUHAN SYARAT", colSpan: 3, styles: { halign: "center" } },
+          { content: "KETERANGAN", rowSpan: 2, styles: { halign: "center", valign: "middle" } },
+        ],
+        [
+          { content: "YA", styles: { halign: "center" } },
+          { content: "TIDAK", styles: { halign: "center" } },
+          { content: "N/A", styles: { halign: "center" } },
+        ],
+      ];
 
-      const nomorOrder = String(formData?.step1?.dataPengujian?.nomorOrder || "hasil-pengujian");
-      const safeFileName = nomorOrder.replace(/[^a-z0-9_-]/gi, "-");
-      pdf.save(`hasil-pengujian-${safeFileName}.pdf`);
+      const tableBody = [
+        ["I", "Pemeriksaan Administrasi & Visual", "X", "", "", ""],
+        ["II", "Uji Unjuk Kerja (Performance Tests)", "", "", "", ""],
+        ["", "2.1 Pengujian Volume Nominal", "X", "", "", ""],
+        ["", "2.2 Pengujian Ruang Kosong", "X", "", "", ""],
+        ["", "2.3 Pengujian Kepekaan di Sekitar Volume Nominal", "X", "", "", ""],
+        ["", "2.4 Pengujian Perubahan Volume Akibat Deformasi", "", "", "X", ""],
+        ["", "2.5 Pengujian Volume Cairan Tertinggal", "X", "", "", ""],
+      ];
+
+      autoTable(pdf, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: tableHead,
+        body: tableBody,
+        theme: "plain",
+        styles: {
+          font: "helvetica",
+          fontSize: 7.5,
+          cellPadding: 1.7,
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+          textColor: [0, 0, 0],
+        },
+        headStyles: {
+          fontStyle: "bold",
+          fillColor: [255, 255, 255],
+        },
+        columnStyles: {
+          0: { cellWidth: 10, halign: "center" },
+          1: { cellWidth: "auto" },
+          2: { cellWidth: 12, halign: "center" },
+          3: { cellWidth: 14, halign: "center" },
+          4: { cellWidth: 12, halign: "center" },
+          5: { cellWidth: 25 },
+        },
+      });
+
+      // Tanda Tangan & QR Code Halaman 2
+      // @ts-expect-error Mengambil posisi Y akhir tabel
+      const finalTableY = pdf.lastAutoTable.finalY || 120;
+      y = finalTableY + 8;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const signatureX = pageWidth - margin - 18;
+      pdf.text("Bandung, 8 Juli 2025", signatureX, y, { align: "center" });
+      y += 4;
+      pdf.text("Manajer Pelayanan Persetujuan Tipe,", signatureX, y, { align: "center" });
+
+      y += 4;
+      const qrCodeData = await fetch("/assets/qr-specimen.png")
+        .then((res) => {
+          if (!res.ok) {
+            return null;
+          }
+          return res.blob();
+        })
+        .then(
+          (blob) =>
+            blob
+              ? new Promise<string | null>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = () => resolve(null);
+              reader.readAsDataURL(blob);
+            })
+              : null
+        )
+        .catch(() => null);
+
+      if (qrCodeData) {
+        pdf.addImage(qrCodeData, "PNG", signatureX - 16, y, 32, 32);
+        y += 34;
+      } else {
+        y += 28;
+      }
+
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Dr. Yudi Risman Hadiyanto, S.Si. M.Se.", signatureX, y, { align: "center" });
+      y += 4;
+      pdf.setFont("helvetica", "normal");
+      pdf.text("NIP: 197209292005021001", signatureX, y, { align: "center" });
+
+      const safeFileName = nomorSurat.replace(/[^a-z0-9_-]/gi, "-");
+      sessionStorage.setItem("e-cerapan-pdf", pdf.output("datauristring"));
+      sessionStorage.setItem("e-cerapan-pdf-name", `SKHP-${safeFileName}.pdf`);
+
       setIsModalOpen(false);
-      alert("Hasil pengujian berhasil disimpan!");
+      router.push("/e-cerapan/pengujianberhasil");
     } catch (error) {
-      console.error(error);
+      console.error("Gagal mengekspor PDF:", error);
     } finally {
       setIsLoading(false);
     }
@@ -262,6 +391,9 @@ export default function HasilPengujianPage({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmSimpan}
+        noPengujian={dataPengujian[0].value}
+        tanggal={dataPengujian[1].value}
+        jenisAlat="Pompa Ukur BBM"
         isLoading={isLoading}
       />
 
