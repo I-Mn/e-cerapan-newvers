@@ -21,7 +21,7 @@ export default function CtaSection() {
         <Button
           variant='primary'
           onPress={() => router.push('/e-cerapan')}
-          className="mt-8 rounded-lg bg-yellow-400 px-8 py-3 text-sm font-bold text-white transition hover:bg-yellow-500 md:mt-10 md:px-10 md:text-base"
+          className="mt-8 rounded-lg bg-yellow-400 px-8 py-3 text-sm font-bold text-white transition hover:bg-yellow-500 md:mt-10 md:px-12 md:py-6 md:text-base"
         >
           Coba Sekarang
         </Button>

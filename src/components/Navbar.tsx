@@ -13,7 +13,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="relative z-20 bg-white shadow-sm">
+    <header className="sticky top-0 z-20 bg-white shadow-sm">
       <nav className="mx-auto flex max-w-content items-center justify-between px-5 py-3 md:px-8">
         {/* Logo / brand */}
         <div className="flex items-center gap-3">
