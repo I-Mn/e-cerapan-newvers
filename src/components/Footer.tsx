@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-yellow-400 p-1">
               <Image
-                src="/assets/logo/Metrologi.png"
+                src="/assets/logo/Metrologi.svg"
                 alt="Logo Direktorat Metrologi"
                 fill
                 priority
