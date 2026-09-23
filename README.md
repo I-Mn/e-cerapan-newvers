@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Panduan Proyek
 
-## Getting Started
+## 1. Penamaan Branch Git
 
-First, run the development server:
+Gunakan format `type/deskripsi-singkat` dengan kebab-case.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Type | Digunakan untuk | Contoh |
+|---|---|---|
+| `feat/{name}-page` | Fitur baru forntend| `feat/landing-page` |
+| `feat/backend-{name}` | Backend | `feat/backend-landing-page` |
+
+**Aturan:**
+- Huruf kecil semua, gunakan tanda hubung (`-`), bukan underscore atau spasi.
+- Singkat tapi jelas (2–4 kata).
+- Jika terkait ticket, sertakan ID-nya: `feat/PROJ-123-landing-page`.
+- Satu branch = satu tujuan. Jangan campur perubahan yang tidak berhubungan.
+
+---
+
+## 2. Struktur Proyek Next.js (App Router)
+
+```
+app/
+├── dashboard/
+│   ├── page.tsx
+│   └── report-detail/[reportId]/
+│       └── page.tsx
+├── contact/
+│   └── page.tsx
+├── report-management/
+│   ├── page.tsx
+│   └── [reportNumber]/
+│       └── page.tsx
+├── page.tsx                     # landing page (/)
+│
+├── api/                         # SEMUA backend route ada di sini, mengikuti nama fitur
+│   ├── dashboard/
+│   │   ├── statistic/route.ts
+│   │   └── summary-category/route.ts
+│   ├── reports/
+│   │   ├── route.ts
+│   │   └── [reportNumber]/route.ts
+│   └── contact/route.ts
+│
+├── layout.tsx
+├── globals.css
+└── not-found.tsx
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Aturan umum
+- **`app/api/`** — semua backend route ada di satu tree ini, mengikuti nama fitur terkait (`api/reports`, `api/contact`, `api/dashboard`, dst). `route.ts` menangani `GET`/`POST`/dll.
+- **`[param]/`** — dynamic route segment, contoh: `[reportNumber]`, `[reportId]`, `[roomCode]`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Setiap Halaman Punya Page Component Sendiri
 
-## Learn More
+Daripada menulis seluruh UI langsung di dalam `page.tsx`, setiap halaman punya komponen `*-content.tsx` khusus yang menampung UI sebenarnya, dan `page.tsx` cukup me-render komponen tersebut.
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/page.tsx                               →  merender <LandingContent />
+app/dashboard/page.tsx                     →  merender <DashboardContent />
+app/profile/page.tsx                       →  merender <ProfileContent />
+app/reporting/[roomCode]/page.tsx          →  merender <ReportingContent />
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+File `*-content.tsx` beserta semua yang dibutuhkannya diletakkan bersama di `components/customs/<nama-halaman>/`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+components/customs/
+├── dashboard/
+│   ├── dashboard-content.tsx        # page component-nya
+│   ├── cards/
+│   │   └── report-card.tsx
+│   ├── modals/
+│   │   └── cancel-report-modal.tsx
+│   ├── tabs/
+│   │   └── report-filter-tab.tsx
+│   └── widgets/
+│       ├── activity-widget.tsx
+│       ├── stat-widget.tsx
+│       └── help-widget.tsx
+│
+├── landing/
+│   ├── landing-content.tsx
+│   ├── sections/
+│   │   ├── hero-section.tsx
+│   │   ├── features-section.tsx
+│   │   └── cta-section.tsx
+│   ├── cards/
+│   │   ├── feature-card.tsx
+│   │   └── stat-card.tsx
+│   └── banners/
+│       └── cta-banner.tsx
+│
+├── profile/
+│   ├── profile-content.tsx
+│   ├── cards/
+│   │   ├── profile-header-card.tsx
+│   │   └── account-info-card.tsx
+│   ├── forms/
+│   │   └── security-form.tsx
+│   └── modals/
+│       └── image-upload-modal.tsx
+│
+└── contact/
+    ├── cards/
+    │   └── card-information.tsx
+    ├── forms/
+    │   └── custom-card-contact.tsx
+    └── inputs/
+        └── custom-input-textarea.tsx
+```
 
-## Deploy on Vercel
+### Aturan umum
+- **Nama folder = nama halaman** (`dashboard`, `landing`, `profile`, `contact`, `reporting`, `scan-to-report`, dst).
+- **`<halaman>-content.tsx`** adalah page component sebenarnya — inilah yang di-import dan dirender oleh `page.tsx`. Komponen ini yang bertanggung jawab atas layout/komposisi halaman tersebut.
+- Pecah content component menjadi subfolder berdasarkan **peran/fungsinya**, jangan asal-asalan:
+  - `cards/` — blok UI berbentuk card
+  - `sections/` — bagian besar halaman (hero, features, CTA)
+  - `forms/` — form khusus halaman tersebut
+  - `modals/` — dialog/modal yang hanya dipakai di halaman itu
+  - `widgets/` — blok UI+logic kecil yang berdiri sendiri
+  - `tabs/`, `inputs/`, `banners/`, `sidebar/`, `header/` — sesuai kebutuhan
+- Jika sebuah halaman punya `index.ts`, gunakan untuk re-export komponen publik halaman tersebut (seperti gaya `components/customs/landing/cards/index.ts`) supaya import di tempat lain tetap rapi.
+- **Cara mudah menentukan:** kalau sebuah komponen hanya pernah dirender di dalam tree `*-content.tsx` satu halaman → simpan di `customs/<halaman>/`. Kalau dipakai di 2+ halaman → naikkan ke `components/layout/` (navbar, footer) atau `components/ui/` (primitive generik).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 4. Komponen UI Bersama (`components/ui/`)
+
+Building block generik yang tidak terikat halaman tertentu — tanpa business logic, tanpa mengetahui data aplikasi.
+
+```
+components/ui/
+├── button.tsx
+├── card.tsx
+├── input.tsx
+├── dialog.tsx
+├── dropdown-menu.tsx
+├── select.tsx
+├── table.tsx
+├── tooltip.tsx
+└── skeleton.tsx
+```
+
+### Ringkasan lokasi tiap komponen
+
+| Layer | Lokasi | Contoh |
+|---|---|---|
+| Primitive generik | `components/ui/` | `button.tsx`, `card.tsx` |
+| Layout yang dipakai berulang | `components/layout/` | `main-navbar.tsx`, `main-footer.tsx` |
+| Komponen khusus halaman | `components/customs/<halaman>/` | `dashboard-content.tsx`, `landing/sections/hero-section.tsx` |
+| Backend route | `app/api/<fitur>/route.ts` | `app/api/reports/route.ts` |
+
+**Cara mudah menentukan:** kalau komponen tidak tahu apa-apa soal data aplikasi → `ui/`. Kalau berupa "chrome" bersama di semua halaman (nav, sidebar, footer) → `components/layout/`. Kalau hanya milik satu halaman → `components/customs/<halaman>/`.
