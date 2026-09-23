@@ -131,7 +131,6 @@ components/customs/
   - `modals/` — dialog/modal yang hanya dipakai di halaman itu
   - `widgets/` — blok UI+logic kecil yang berdiri sendiri
   - `tabs/`, `inputs/`, `banners/`, `sidebar/`, `header/` — sesuai kebutuhan
-- Jika sebuah halaman punya `index.ts`, gunakan untuk re-export komponen publik halaman tersebut (seperti gaya `components/customs/landing/cards/index.ts`) supaya import di tempat lain tetap rapi.
 - **Cara mudah menentukan:** kalau sebuah komponen hanya pernah dirender di dalam tree `*-content.tsx` satu halaman → simpan di `customs/<halaman>/`. Kalau dipakai di 2+ halaman → naikkan ke `components/layout/` (navbar, footer) atau `components/ui/` (primitive generik).
 
 ---
