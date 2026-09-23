@@ -7,7 +7,7 @@ import autoTable from "jspdf-autotable";
 
 import Breadcrumb from "@/components/e-cerapan/layout/Breadcrumb";
 import Stepper from "@/components/e-cerapan/layout/Stepper";
-import PageHeader from "@/components/e-cerapan/ui/PageHeader";
+import PageHeader from "@/components/e-cerapan/layout/PageHeader";
 import ResultCard from "@/components/e-cerapan/ui/ResultCard";
 import MetricSummary from "@/components/e-cerapan/ui/MetricSummary";
 import InfoCard from "@/components/e-cerapan/ui/InfoCard";
@@ -24,6 +24,7 @@ export default function HasilPengujianPage({
   const router = useRouter();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (!updateFormData) {
       router.replace("/e-cerapan");
     }
@@ -321,11 +322,11 @@ export default function HasilPengujianPage({
         .then((blob) =>
           blob
             ? new Promise<string | null>((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = () => resolve(null);
-                reader.readAsDataURL(blob);
-              })
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = () => resolve(null);
+              reader.readAsDataURL(blob);
+            })
             : null,
         )
         .catch(() => null);
@@ -525,7 +526,7 @@ export default function HasilPengujianPage({
         <div className="flex flex-col gap-[40px]">
           <PageHeader
             title="Hasil Keseluruhan Pengujian"
-            subtitle="Evaluasi lengkap semua parameter pengujian Pompa Ukur BBM"
+            description="Evaluasi lengkap semua parameter pengujian Pompa Ukur BBM"
           />
 
           <ResultCard isSuccess={displayIsSuccess} />
