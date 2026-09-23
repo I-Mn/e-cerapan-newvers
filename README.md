@@ -6,20 +6,13 @@ Gunakan format `type/deskripsi-singkat` dengan kebab-case.
 
 | Type | Digunakan untuk | Contoh |
 |---|---|---|
-| `feat/` | Fitur baru | `feat/landing-page` |
-| `fix/` | Perbaikan bug | `fix/navbar-overlap` |
-| `chore/` | Maintenance, dependency, config | `chore/update-eslint` |
-| `refactor/` | Perubahan kode tanpa mengubah behavior | `refactor/auth-hooks` |
-| `style/` | Perubahan tampilan/formatting saja | `style/button-spacing` |
-| `docs/` | Dokumentasi | `docs/api-readme` |
-| `test/` | Menambah/memperbaiki test | `test/checkout-flow` |
-| `hotfix/` | Perbaikan darurat di production | `hotfix/payment-crash` |
-| `release/` | Persiapan rilis | `release/v1.2.0` |
+| `feat/{nama}-page` | Fitur baru frontend | `feat/landing-page` |
+| `feat/backend-{name}` | backend | `feat/backend-landing-page` |
+
 
 **Aturan:**
 - Huruf kecil semua, gunakan tanda hubung (`-`), bukan underscore atau spasi.
 - Singkat tapi jelas (2–4 kata).
-- Jika terkait ticket, sertakan ID-nya: `feat/PROJ-123-landing-page`.
 - Satu branch = satu tujuan. Jangan campur perubahan yang tidak berhubungan.
 
 ---
